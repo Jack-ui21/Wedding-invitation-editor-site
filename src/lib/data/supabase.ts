@@ -290,10 +290,12 @@ export const supabaseStore: DataStore = {
 
   async updateProject(id, patch: ProjectPatch) {
     const projectRow: Record<string, unknown> = { updated_at: new Date().toISOString() };
-    for (const key of ["name", "status", "templateId", "slug", "publishedUrl", "mainFilePath", "fieldMappings"] as const) {
+    for (const key of ["name", "customerId", "ownerId", "status", "templateId", "slug", "publishedUrl", "mainFilePath", "fieldMappings"] as const) {
       if (patch[key] !== undefined) {
         const column: Record<typeof key, string> = {
           name: "project_name",
+          customerId: "customer_id",
+          ownerId: "owner_id",
           status: "status",
           templateId: "template_id",
           slug: "slug",
@@ -389,7 +391,16 @@ export const supabaseStore: DataStore = {
   },
 
   async createTemplate(input) {
-    const { data, error } = await sb().from("templates").insert(input).select("*").single();
+    const { data, error } = await sb()
+      .from("templates")
+      .insert({
+        name: input.name,
+        description: input.description,
+        thumbnail_path: input.thumbnailPath,
+        source_project_id: input.sourceProjectId,
+      })
+      .select("*")
+      .single();
     if (error) throw error;
     return rowToTemplate(data);
   },

@@ -7,6 +7,7 @@ import JSZip from "jszip";
 import {
   AlertCircle,
   ArrowLeft,
+  BookmarkPlus,
   CheckCircle2,
   Code2,
   Download,
@@ -101,6 +102,9 @@ export function EditorClient({ project: initialProject, initialTexts, fileUrls: 
   const [notice, setNotice] = useState("");
   const [publishOpen, setPublishOpen] = useState(false);
   const [exportOpen, setExportOpen] = useState(false);
+  const [templateOpen, setTemplateOpen] = useState(false);
+  const [templateName, setTemplateName] = useState(project.name);
+  const [templateDescription, setTemplateDescription] = useState("");
   const [slugInput, setSlugInput] = useState(initialProject.slug ?? slugify(initialProject.name));
   const [publishError, setPublishError] = useState("");
   const [exportProgress, setExportProgress] = useState("");
@@ -589,6 +593,28 @@ export function EditorClient({ project: initialProject, initialTexts, fileUrls: 
     }
   }
 
+  async function saveAsTemplate(): Promise<void> {
+    if (!templateName.trim()) return;
+    setBusy(true);
+    try {
+      await apiFetch("/api/templates", {
+        method: "POST",
+        body: JSON.stringify({
+          name: templateName.trim(),
+          description: templateDescription.trim(),
+          sourceProjectId: project.id,
+        }),
+      });
+      setTemplateOpen(false);
+      setTemplateDescription("");
+      setNotice(`Saved “${templateName.trim()}” as a reusable template.`);
+    } catch (caught) {
+      setNotice(caught instanceof Error ? caught.message : "Could not save template");
+    } finally {
+      setBusy(false);
+    }
+  }
+
   async function exportZip(): Promise<void> {
     setBusy(true);
     setExportProgress("Preparing project files…");
@@ -678,6 +704,11 @@ export function EditorClient({ project: initialProject, initialTexts, fileUrls: 
             <button className="ws-btn-ghost min-h-10 px-2.5" onClick={undo} disabled={!historyRef.current.past.length} title="Undo (Ctrl/Cmd+Z)"><Undo2 size={16} /><span className="hidden sm:inline">Undo</span></button>
             <button className="ws-btn-ghost min-h-10 px-2.5" onClick={redo} disabled={!historyRef.current.future.length} title="Redo (Ctrl/Cmd+Shift+Z)"><Redo2 size={16} /><span className="hidden sm:inline">Redo</span></button>
             <button className="ws-btn-ghost min-h-10 px-3" onClick={() => setExportOpen(true)}><Download size={16} /> Export</button>
+            {isOwner && (
+              <button className="ws-btn-ghost min-h-10 px-3" disabled={!project.files.length} onClick={() => { setTemplateName(`${project.name} — Template`); setTemplateOpen(true); }} title="Reuse this website for future customers">
+                <BookmarkPlus size={16} /> <span className="hidden sm:inline">Save as template</span>
+              </button>
+            )}
             {isOwner && (
               <button className="ws-btn-primary min-h-10 px-3" onClick={() => { setSlugInput(project.slug ?? slugify(project.name)); setPublishError(""); setPublishOpen(true); }}>
                 <Globe2 size={16} /> {project.status === "published" ? "Manage site" : "Publish"}
@@ -805,6 +836,23 @@ export function EditorClient({ project: initialProject, initialTexts, fileUrls: 
             Large templates may take a little longer. Nothing is sent to a third party; exports are generated in this browser.
           </p>
           {exportProgress && <p className="flex items-center gap-2 text-sm text-plum"><Loader2 className="animate-spin" size={15} /> {exportProgress}</p>}
+        </div>
+      </Modal>
+
+      <Modal open={templateOpen} onClose={() => setTemplateOpen(false)} title="Save as reusable template">
+        <div className="space-y-4">
+          <label className="block">
+            <span className="ws-label">Template name</span>
+            <input className="ws-input" value={templateName} onChange={(event) => setTemplateName(event.target.value)} />
+          </label>
+          <label className="block">
+            <span className="ws-label">Description</span>
+            <textarea className="ws-input min-h-24" value={templateDescription} onChange={(event) => setTemplateDescription(event.target.value)} placeholder="e.g. Royal purple Indian wedding" />
+          </label>
+          <p className="text-xs text-black/50">All {project.files.length} source files, field mappings and events will be copied when this template is used for a new project.</p>
+          <button className="ws-btn-primary w-full" disabled={busy || !templateName.trim()} onClick={() => void saveAsTemplate()}>
+            <BookmarkPlus size={16} /> Save template
+          </button>
         </div>
       </Modal>
     </div>

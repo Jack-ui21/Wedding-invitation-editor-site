@@ -10,6 +10,7 @@
     "test": "node node_modules/vitest/vitest.mjs run --environment jsdom",
     "test:watch": "node node_modules/vitest/vitest.mjs --environment jsdom",
     "seed-owner": "node --import tsx scripts/seed-owner.ts",
+    "seed-templates": "node --import tsx scripts/seed-templates.ts",
     "promote-owner": "node --import tsx scripts/promote-owner.ts"
   },
   "dependencies": {

@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { Plus, UserPlus } from "lucide-react";
-import type { CustomerRecord, SessionUser, TemplateRecord } from "@/lib/data/types";
+import type { CustomerRecord, ProjectRecord, SessionUser, TemplateRecord } from "@/lib/data/types";
 import { apiFetch } from "@/lib/client-fetch";
 import { Shell } from "@/components/Shell";
 import { EmptyState, Field, Modal } from "@/components/ui";
@@ -71,7 +71,15 @@ export function CustomersPageClient({
   );
 }
 
-export function TemplatesPageClient({ user, templates }: { user: SessionUser; templates: TemplateRecord[] }) {
+export function TemplatesPageClient({
+  user,
+  templates,
+  projects,
+}: {
+  user: SessionUser;
+  templates: TemplateRecord[];
+  projects: ProjectRecord[];
+}) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
   const [error, setError] = useState("");
@@ -85,7 +93,11 @@ export function TemplatesPageClient({ user, templates }: { user: SessionUser; te
     try {
       await apiFetch("/api/templates", {
         method: "POST",
-        body: JSON.stringify({ name: data.get("name"), description: data.get("description") }),
+        body: JSON.stringify({
+          name: data.get("name"),
+          description: data.get("description"),
+          sourceProjectId: data.get("sourceProjectId") || null,
+        }),
       });
       setOpen(false);
       router.refresh();
@@ -101,19 +113,33 @@ export function TemplatesPageClient({ user, templates }: { user: SessionUser; te
       {error && <p className="mb-5 rounded-xl bg-red-50 p-3 text-sm text-red-700">{error}</p>}
       {templates.length === 0 ? <EmptyState title="No templates saved" detail="Import a wedding website in a project, then save it as a template for future customers." /> : (
         <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {templates.map((template) => (
-            <div key={template.id} className="ws-card p-5">
-              <h2 className="text-lg text-plum">{template.name}</h2>
-              <p className="mt-2 text-sm text-black/55">{template.description || "No description"}</p>
-              <p className="mt-4 text-xs text-black/40">Added {new Date(template.createdAt).toLocaleDateString()}</p>
-            </div>
-          ))}
+          {templates.map((template) => {
+            const source = projects.find((project) => project.id === template.sourceProjectId);
+            return (
+              <div key={template.id} className="ws-card p-5">
+                <h2 className="text-lg text-plum">{template.name}</h2>
+                <p className="mt-2 text-sm text-black/55">{template.description || "No description"}</p>
+                <p className="mt-3 text-xs text-black/55">
+                  {source ? `Reuses files from “${source.name}” (${source.files.length} files)` : "No source project — select one when creating a project from this template."}
+                </p>
+                <p className="mt-2 text-xs text-black/40">Added {new Date(template.createdAt).toLocaleDateString()}</p>
+              </div>
+            );
+          })}
         </div>
       )}
       <Modal open={open} onClose={() => setOpen(false)} title="New template">
         <form className="space-y-4" onSubmit={create}>
           <Field label="Template name"><input className="ws-input" name="name" required /></Field>
           <Field label="Description"><textarea className="ws-input min-h-24" name="description" /></Field>
+          <Field label="Source project" hint="Its files, field mappings and wedding data are copied into every new project.">
+            <select className="ws-input" name="sourceProjectId" defaultValue="">
+              <option value="">None (empty template)</option>
+              {projects.filter((project) => project.files.length > 0).map((project) => (
+                <option key={project.id} value={project.id}>{project.name} — {project.files.length} files</option>
+              ))}
+            </select>
+          </Field>
           <button className="ws-btn-primary w-full" disabled={busy}>Save template</button>
         </form>
       </Modal>

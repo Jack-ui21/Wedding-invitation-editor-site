@@ -18,10 +18,13 @@ A multi-tenant wedding website studio: owners manage customers, templates and pr
 ```bash
 npm install --no-bin-links   # needed on Termux/Android shared storage
 npm run seed-owner owner@example.com 'OwnerPass123!'
+npm run seed-templates           # optional: register the two supplied HTML templates
 npm run dev
 ```
 
 Open <http://localhost:3000/login>. The seeded owner can add customers, create projects, import templates, publish and export.
+
+`seed-templates` parses the two supplied HTML files once and stores them as archived source projects plus template records. The Templates page lists them; choosing one in **New project** copies its files, field mappings and events into the customer's new project. You can also use **Save as template** inside any project editor to turn a finished invitation into a reusable template.
 
 Run unit tests:
 

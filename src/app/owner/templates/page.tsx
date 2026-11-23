@@ -6,6 +6,7 @@ export const dynamic = "force-dynamic";
 
 export default async function TemplatesPage() {
   const user = await requireOwner();
-  const templates = await getStore().listTemplates();
-  return <TemplatesPageClient user={user} templates={templates} />;
+  const store = getStore();
+  const [templates, projects] = await Promise.all([store.listTemplates(), store.listProjects()]);
+  return <TemplatesPageClient user={user} templates={templates} projects={projects} />;
 }

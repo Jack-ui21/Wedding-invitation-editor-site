@@ -146,6 +146,8 @@ export interface SessionUser {
 
 export interface ProjectPatch {
   name?: string;
+  customerId?: string;
+  ownerId?: string;
   status?: ProjectStatus;
   templateId?: string | null;
   slug?: string | null;

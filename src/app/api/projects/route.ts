@@ -30,12 +30,32 @@ export async function POST(request: Request) {
     const store = getStore();
     const customer = await store.getCustomerById(body.customerId);
     if (!customer) return NextResponse.json({ error: "Customer not found" }, { status: 404 });
-    const project = await store.createProject({
-      customerId: customer.id,
-      ownerId: user.id,
-      name: body.name,
-      templateId: body.templateId ?? null,
-    });
+
+    const template = body.templateId
+      ? (await store.listTemplates()).find((item) => item.id === body.templateId) ?? null
+      : null;
+    if (body.templateId && !template) return NextResponse.json({ error: "Template not found" }, { status: 404 });
+
+    let project;
+    if (template?.sourceProjectId && await store.getProject(template.sourceProjectId)) {
+      // A template is backed by a real project: copy its source files, mappings and wedding data.
+      const copy = await store.duplicateProject(template.sourceProjectId, body.name.trim());
+      project = await store.updateProject(copy.id, {
+        customerId: customer.id,
+        ownerId: user.id,
+        templateId: template.id,
+        status: "draft",
+        slug: null,
+        publishedUrl: null,
+      });
+    } else {
+      project = await store.createProject({
+        customerId: customer.id,
+        ownerId: user.id,
+        name: body.name,
+        templateId: template?.id ?? null,
+      });
+    }
     return NextResponse.json({ project }, { status: 201 });
   } catch (error) {
     return NextResponse.json({ error: error instanceof Error ? error.message : "Could not create project" }, { status: 400 });
