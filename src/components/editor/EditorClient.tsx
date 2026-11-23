@@ -196,14 +196,16 @@ export function EditorClient({ project: initialProject, initialTexts, fileUrls: 
     if (text == null) return;
     beginSave();
     try {
-      const response = await fetch(`/api/projects/${current.id}/files`, {
-        method: "POST",
-        headers: { "x-file-path": path, "x-content-type": mimeForPath(path) },
-        body: new Blob([text]),
+      const bytes = new TextEncoder().encode(text);
+      const uploaded = await uploadProjectFile(current.id, {
+        path,
+        name: path.split("/").pop() ?? path,
+        kind: detectFileKind(path),
+        mimeType: mimeForPath(path),
+        size: bytes.byteLength,
+        text,
       });
-      const result = (await response.json()) as { file?: ProjectFile; url?: string; error?: string };
-      if (!response.ok || !result.file) throw new Error(result.error ?? `Could not save ${path}`);
-      if (result.url) setFileUrls((previous) => ({ ...previous, [path]: result.url as string }));
+      if (uploaded.url) setFileUrls((previous) => ({ ...previous, [path]: uploaded.url }));
       endSave();
     } catch (caught) {
       endSave(caught instanceof Error ? caught.message : `Could not save ${path}`);
