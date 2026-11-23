@@ -328,6 +328,10 @@ export const localStore: DataStore = {
     return file;
   },
 
+  async createSignedUploadUrl() {
+    throw new Error("Signed upload URLs are only available with the Supabase driver");
+  },
+
   async registerFile(projectId, file) {
     const db = await readDb();
     const project = db.projects.find((item) => item.id === projectId);

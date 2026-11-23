@@ -25,10 +25,14 @@ export async function uploadProjectFile(
     const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
     const anon = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
     if (!url || !anon) throw new Error("Supabase Storage is not configured");
+    const signed = await apiFetch<{ path: string; token: string; signedUrl: string }>(
+      `/api/projects/${projectId}/upload-url`,
+      { method: "POST", body: JSON.stringify({ path: file.path }) },
+    );
     const supabase = createClient(url, anon);
     const { error } = await supabase.storage
       .from(STORAGE_BUCKET)
-      .upload(`${projectId}/${file.path}`, bytes, { contentType: file.mimeType, upsert: true });
+      .uploadToSignedUrl(signed.path, signed.token, bytes, { contentType: file.mimeType });
     if (error) throw new Error(error.message);
     onProgress?.(80);
     const result = await apiFetch<UploadedFile>(`/api/projects/${projectId}/files`, {

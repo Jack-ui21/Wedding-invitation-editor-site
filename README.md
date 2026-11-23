@@ -10,7 +10,7 @@ A multi-tenant wedding website studio: owners manage customers, templates and pr
 - **Sessions**: signed, httpOnly cookies shared by both drivers.
 - **Authorization**: every API route checks the server session and project ownership; Supabase RLS mirrors the same rules.
 - **Preview**: `iframe srcDoc` with `sandbox="allow-scripts allow-forms allow-popups allow-modals allow-popups-to-escape-sandbox"` and no `allow-same-origin`.
-- **Large imports**: browser reads HTML/ZIP directly; production uploads go straight to Supabase Storage, bypassing Vercel's function body limit.
+- **Large imports**: browser reads HTML/ZIP directly; production uploads use short-lived signed URLs issued by the server and go straight to Supabase Storage, bypassing Vercel's function body limit.
 - **Single source of truth**: visual edits are written back into the real HTML source; code edits replace file contents; preview and exports render current source.
 
 ## Local development

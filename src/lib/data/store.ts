@@ -68,7 +68,9 @@ export interface DataStore {
     mimeType: string,
     options?: { isAsset?: boolean },
   ): Promise<ProjectFile>;
-  /** Registers metadata for a file that was uploaded directly to storage (Supabase client upload). */
+  /** Creates a short-lived signed upload URL so browsers can upload large files directly. */
+  createSignedUploadUrl(projectId: string, path: string): Promise<{ path: string; token: string; signedUrl: string }>;
+  /** Registers metadata for a file that was uploaded directly to storage. */
   registerFile(projectId: string, file: ProjectFile): Promise<ProjectFile>;
   deleteFile(projectId: string, path: string): Promise<void>;
   getFileUrl(projectId: string, path: string): Promise<string>;

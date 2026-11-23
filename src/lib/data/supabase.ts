@@ -465,6 +465,15 @@ export const supabaseStore: DataStore = {
     return file;
   },
 
+  async createSignedUploadUrl(projectId, relative) {
+    const safe = safeRelativePath(relative);
+    const { data, error } = await sb()
+      .storage.from(STORAGE_BUCKET)
+      .createSignedUploadUrl(`${projectId}/${safe}`, { upsert: true });
+    if (error || !data) throw error ?? new Error("Could not create upload URL");
+    return { path: data.path, token: data.token, signedUrl: data.signedUrl };
+  },
+
   async registerFile(projectId, file) {
     const { error } = await sb().from("project_files").upsert(
       {
