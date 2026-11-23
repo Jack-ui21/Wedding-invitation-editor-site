@@ -1,0 +1,16 @@
+node_modules/
+.next/
+out/
+.data/
+.env
+.env.local
+.env.*.local
+*.tsbuildinfo
+coverage/
+playwright-report/
+test-results/
+.DS_Store
+
+# Local benchmark templates (not app source)
+/Traditional_Wedding_Website_for_Digital_Wedding_Invitation_FIXED.html
+/Royal_Purple_Fantasy_Indian_Wedding_Invitation_Website.html

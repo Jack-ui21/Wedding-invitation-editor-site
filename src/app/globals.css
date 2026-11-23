@@ -1,0 +1,150 @@
+@import "tailwindcss";
+
+@theme {
+  --color-ink: #211826;
+  --color-plum: #4b2146;
+  --color-plum-deep: #2e1230;
+  --color-gold: #c99a4b;
+  --color-ivory: #faf6f1;
+  --color-blush: #f3e9e6;
+  --font-display: Georgia, "Times New Roman", serif;
+}
+
+:root {
+  color-scheme: light;
+}
+
+html,
+body {
+  min-height: 100%;
+}
+
+body {
+  background: var(--color-ivory);
+  color: var(--color-ink);
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  font-family: var(--font-display);
+}
+
+.ws-card {
+  border-radius: 1rem;
+  border: 1px solid rgb(0 0 0 / 0.08);
+  background: #fff;
+  box-shadow: 0 12px 40px -24px rgb(53 20 48 / 0.35);
+}
+
+.ws-btn,
+.ws-btn-primary,
+.ws-btn-gold,
+.ws-btn-ghost {
+  display: inline-flex;
+  min-height: 2.75rem;
+  align-items: center;
+  justify-content: center;
+  gap: 0.5rem;
+  border-radius: 0.75rem;
+  padding: 0.625rem 1rem;
+  font-size: 0.875rem;
+  font-weight: 600;
+  line-height: 1.25rem;
+  text-decoration: none;
+  cursor: pointer;
+  transition: background-color 150ms ease, transform 150ms ease, filter 150ms ease;
+}
+
+.ws-btn:active,
+.ws-btn-primary:active,
+.ws-btn-gold:active,
+.ws-btn-ghost:active {
+  transform: scale(0.98);
+}
+
+.ws-btn:disabled,
+.ws-btn-primary:disabled,
+.ws-btn-gold:disabled,
+.ws-btn-ghost:disabled {
+  cursor: not-allowed;
+  opacity: 0.5;
+}
+
+.ws-btn-primary {
+  background: var(--color-plum);
+  color: #fff;
+}
+
+.ws-btn-primary:hover {
+  background: var(--color-plum-deep);
+}
+
+.ws-btn-gold {
+  background: var(--color-gold);
+  color: var(--color-plum-deep);
+}
+
+.ws-btn-gold:hover {
+  filter: brightness(1.05);
+}
+
+.ws-btn-ghost {
+  border: 1px solid rgb(0 0 0 / 0.1);
+  background: #fff;
+  color: var(--color-ink);
+}
+
+.ws-btn-ghost:hover {
+  background: rgb(0 0 0 / 0.05);
+}
+
+.ws-input {
+  min-height: 2.75rem;
+  width: 100%;
+  border-radius: 0.75rem;
+  border: 1px solid rgb(0 0 0 / 0.12);
+  background: #fff;
+  padding: 0.625rem 0.875rem;
+  font-size: 15px;
+  line-height: 1.5rem;
+  outline: none;
+}
+
+.ws-input::placeholder {
+  color: rgb(0 0 0 / 0.35);
+}
+
+.ws-input:focus {
+  border-color: var(--color-plum);
+  box-shadow: 0 0 0 3px rgb(75 33 70 / 0.15);
+}
+
+.ws-label {
+  display: block;
+  margin-bottom: 0.375rem;
+  font-size: 0.75rem;
+  font-weight: 600;
+  letter-spacing: 0.025em;
+  color: rgb(0 0 0 / 0.55);
+  text-transform: uppercase;
+}
+
+.ws-badge {
+  display: inline-flex;
+  align-items: center;
+  border-radius: 9999px;
+  padding: 0.25rem 0.625rem;
+  font-size: 11px;
+  font-weight: 600;
+}
+
+.ws-scroll::-webkit-scrollbar {
+  width: 8px;
+  height: 8px;
+}
+.ws-scroll::-webkit-scrollbar-thumb {
+  background: rgb(75 33 70 / 0.2);
+  border-radius: 999px;
+}
