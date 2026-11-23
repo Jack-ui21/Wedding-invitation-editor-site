@@ -64,5 +64,8 @@ describe("editor source", () => {
       publicMode: true,
     });
     expect(doc).not.toContain("data-wis-bridge");
+    expect(doc).toContain("data-wis-public");
+    expect(doc).toContain("__wisTarget");
+    expect(doc).not.toContain("postMessage");
   });
 });

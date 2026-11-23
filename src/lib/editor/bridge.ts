@@ -6,6 +6,8 @@ export interface BridgeOptions {
   mappings: FieldMappings;
   events: WeddingEvent[];
   selectMode: boolean;
+  /** Published/exported pages keep countdown, music and accent logic but no editor messaging. */
+  publicMode?: boolean;
 }
 
 function jsString(value: unknown): string {
@@ -147,6 +149,7 @@ export function bridgeScript(options: BridgeOptions): string {
     style.textContent = ':root{--primary:' + color + '!important;--accent:' + color + '!important;}a{color:' + color + ';}';
   }
 
+  ${options.publicMode ? "" : `
   window.addEventListener('message', function (event) {
     const data = event.data;
     if (!data || data.wis !== TOKEN) return;
@@ -164,6 +167,7 @@ export function bridgeScript(options: BridgeOptions): string {
     event.stopPropagation();
     window.parent.postMessage({ wis: TOKEN, type: 'wis:selection', selector: selectorFor(el), text: (el.textContent || '').replace(/\\s+/g, ' ').trim().slice(0, 200) }, '*');
   }, true);
+  `}
 
   applyMappings();
   startCountdown();

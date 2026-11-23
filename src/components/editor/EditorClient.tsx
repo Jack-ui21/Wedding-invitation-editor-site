@@ -660,6 +660,9 @@ export function EditorClient({ project: initialProject, initialTexts, fileUrls: 
         mainFilePath: project.mainFilePath,
         files: project.files,
         texts,
+        details: project.wedding,
+        mappings: project.fieldMappings,
+        events: project.events,
         fetchAsset: async (path) => {
           const response = await fetch(urlFor(project.id, path));
           return response.ok ? response.arrayBuffer() : null;

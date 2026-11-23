@@ -150,17 +150,17 @@ export function buildPreviewDocument(options: PreviewOptions): string {
     if (value) setField(doc, key, value, selector);
   }
 
-  if (!options.publicMode) {
-    const bridge = doc.createElement("script");
-    bridge.setAttribute("data-wis-bridge", "");
-    bridge.textContent = bridgeScript({
-      token: options.token,
-      details: options.details,
-      mappings: options.mappings,
-      events: options.events,
-      selectMode: options.selectMode,
-    });
-    doc.body.appendChild(bridge);
-  }
+  // Public pages keep the countdown/music/accent runtime, but never the editor bridge.
+  const script = doc.createElement("script");
+  script.setAttribute(options.publicMode ? "data-wis-public" : "data-wis-bridge", "");
+  script.textContent = bridgeScript({
+    token: options.publicMode ? "" : options.token,
+    details: options.details,
+    mappings: options.mappings,
+    events: options.events,
+    selectMode: options.selectMode,
+    publicMode: options.publicMode,
+  });
+  doc.body.appendChild(script);
   return serializeSource(doc);
 }

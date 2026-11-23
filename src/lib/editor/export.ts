@@ -1,5 +1,6 @@
 import { normalizePath } from "../import/analyze";
-import type { ProjectFile } from "../data/types";
+import type { FieldMappings, ProjectFile, WeddingDetails, WeddingEvent } from "../data/types";
+import { bridgeScript } from "./bridge";
 
 const EXTERNAL_REF = /^(data:|https?:|mailto:|tel:|javascript:|blob:|#|\/\/)/i;
 const TEXT_KINDS = new Set(["html", "css", "js", "other"]);
@@ -23,6 +24,9 @@ export interface StandaloneOptions {
   mainFilePath: string;
   files: ProjectFile[];
   texts: Record<string, string>;
+  details: WeddingDetails;
+  mappings: FieldMappings;
+  events: WeddingEvent[];
   fetchAsset: (path: string) => Promise<ArrayBuffer | null>;
 }
 
@@ -59,10 +63,13 @@ export async function buildStandaloneHtml(options: StandaloneOptions): Promise<s
     for (const match of matches) {
       const raw = match[2];
       const start = match.index ?? 0;
-      if (EXTERNAL_REF.test(raw)) continue;
-      const url = await assetData(normalizePath(basePath, raw));
-      if (!url) continue;
-      output += css.slice(cursor, start) + `url("${url}")`;
+      output += css.slice(cursor, start);
+      if (EXTERNAL_REF.test(raw)) {
+        output += match[0];
+      } else {
+        const url = await assetData(normalizePath(basePath, raw));
+        output += url ? `url("${url}")` : match[0];
+      }
       cursor = start + match[0].length;
     }
     return output + css.slice(cursor);
@@ -108,6 +115,18 @@ export async function buildStandaloneHtml(options: StandaloneOptions): Promise<s
       if (url) element.setAttribute(attr, url);
     }
   }
+
+  const runtime = doc.createElement("script");
+  runtime.setAttribute("data-wis-public", "");
+  runtime.textContent = bridgeScript({
+    token: "",
+    details: options.details,
+    mappings: options.mappings,
+    events: options.events,
+    selectMode: false,
+    publicMode: true,
+  });
+  doc.body.appendChild(runtime);
 
   const doctype = doc.doctype ? `<!DOCTYPE ${doc.doctype.name}>` : "<!DOCTYPE html>";
   return `${doctype}\n${doc.documentElement.outerHTML}`;
