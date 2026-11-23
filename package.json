@@ -11,7 +11,8 @@
     "test:watch": "node node_modules/vitest/vitest.mjs --environment jsdom",
     "seed-owner": "node --import tsx scripts/seed-owner.ts",
     "seed-templates": "node --import tsx scripts/seed-templates.ts",
-    "promote-owner": "node --import tsx scripts/promote-owner.ts"
+    "promote-owner": "node --import tsx scripts/promote-owner.ts",
+    "check:deploy-env": "node scripts/check-deploy-env.mjs"
   },
   "dependencies": {
     "@monaco-editor/react": "4.7.0",

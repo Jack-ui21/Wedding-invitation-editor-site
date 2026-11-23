@@ -1,12 +1,13 @@
 /**
- * Local development only: turns the supplied HTML wedding templates into reusable studio templates.
- * Usage: DATA_DRIVER=local node --import tsx scripts/seed-templates.ts [owner@example.com]
+ * Turns the supplied HTML wedding templates into reusable studio templates.
+ * Works with the local driver or the Supabase driver, depending on your env vars.
+ * Usage: npm run seed-templates [owner@example.com]
  * Existing templates are skipped, so the script is safe to rerun.
  */
 import { readFile } from "node:fs/promises";
 import path from "node:path";
 import { JSDOM } from "jsdom";
-import { localStore } from "../src/lib/data/local";
+import { getStore } from "../src/lib/data/get-store";
 import { createEmptyWedding } from "../src/lib/data/types";
 import type { FieldMappings, WeddingDetails, WeddingEvent } from "../src/lib/data/types";
 import { importHtml } from "../src/lib/import/html";
@@ -31,13 +32,14 @@ const TEMPLATES = [
 const URL_FIELDS = new Set(["mapsUrl", "musicUrl", "instagramUrl", "mapUrl", "imageUrl"]);
 
 async function main() {
-  await localStore.ready();
-  const owner = await localStore.getUserByEmail(OWNER_EMAIL);
-  if (!owner || owner.role !== "owner") throw new Error(`Owner ${OWNER_EMAIL} not found. Run seed-owner first.`);
-  const customer = await localStore.getCustomerByUserId(owner.id);
-  if (!customer) throw new Error("Owner has no customer profile. Open /owner once, then rerun.");
+  const store = getStore();
+  await store.ready();
+  const owner = await store.getUserByEmail(OWNER_EMAIL);
+  if (!owner || owner.role !== "owner") throw new Error(`Owner ${OWNER_EMAIL} not found. Register/sign in and promote first.`);
+  const customer = await store.getCustomerByUserId(owner.id);
+  if (!customer) throw new Error("Owner has no customer profile. Open /owner once in the app, then rerun.");
 
-  const existing = await localStore.listTemplates();
+  const existing = await store.listTemplates();
   for (const spec of TEMPLATES) {
     if (existing.some((template) => template.name === spec.name)) {
       console.log(`SKIP ${spec.name} (already registered)`);
@@ -49,7 +51,7 @@ async function main() {
     const started = Date.now();
     const result = importHtml(spec.file, html);
 
-    const project = await localStore.createProject({
+    const project = await store.createProject({
       customerId: customer.id,
       ownerId: owner.id,
       name: `[Template source] ${spec.name}`,
@@ -58,7 +60,7 @@ async function main() {
 
     for (const file of result.files) {
       const bytes = file.bytes ?? new TextEncoder().encode(file.text ?? "");
-      await localStore.putFile(project.id, file.path, Buffer.from(bytes), file.mimeType, { isAsset: file.isAsset });
+      await store.putFile(project.id, file.path, Buffer.from(bytes), file.mimeType, { isAsset: file.isAsset });
     }
 
     const mappings: FieldMappings = {};
@@ -79,7 +81,7 @@ async function main() {
       }
     }
 
-    await localStore.updateProject(project.id, {
+    await store.updateProject(project.id, {
       wedding,
       events,
       fieldMappings: mappings,
@@ -94,7 +96,7 @@ async function main() {
       status: "archived",
     });
 
-    const template = await localStore.createTemplate({
+    const template = await store.createTemplate({
       name: spec.name,
       description: spec.description,
       thumbnailPath: "",

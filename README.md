@@ -42,21 +42,13 @@ On Android/Termux, Turbopack and several native modules are unsupported. The scr
 
 ## Production setup
 
-1. Create a Supabase project. Apply `supabase/migrations/0001_init.sql` in its SQL editor.
-2. Create a GitHub repository and push this project (do not commit `.env.local`).
-3. Create a Vercel project and add these environment variables:
+Follow **[DEPLOYMENT.md](DEPLOYMENT.md)**. It contains the full ordered checklist, the exact environment variables (`.env.production.example`), both Supabase SQL files, owner promotion, production template seeding and troubleshooting.
 
-   - `DATA_DRIVER=supabase`
-   - `NEXT_PUBLIC_DATA_DRIVER=supabase`
-   - `NEXT_PUBLIC_SUPABASE_URL`
-   - `NEXT_PUBLIC_SUPABASE_ANON_KEY`
-   - `SUPABASE_SERVICE_ROLE_KEY`
-   - `OWNER_EMAIL`
-   - `NEXT_PUBLIC_SITE_URL` (e.g. `https://studio.example.com`)
-   - `SESSION_SECRET` (32+ random characters, generate with `openssl rand -hex 32`)
+Quick verification before deploying:
 
-4. Deploy, register/sign in the owner email, then run `npm run promote-owner owner@example.com` locally with the production Supabase variables set.
-5. Add customers, import the two supplied templates or custom ZIPs, then publish from the project editor.
+```bash
+npm run check:deploy-env
+```
 
 Never paste secrets into chat or commit them.
 
