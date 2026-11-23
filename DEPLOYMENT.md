@@ -1,14 +1,15 @@
 # Wedding Invitation Studio — deployment kit
 
-This is the "do it in order" guide. You need three free/paid accounts:
+This is the "do it in order" guide. You need two mandatory accounts:
 
 1. **Supabase** — database, login and file storage. <https://supabase.com/dashboard>
-2. **GitHub** — source code. <https://github.com/new>
-3. **Vercel** — runs the Next.js app. <https://vercel.com/new>
+2. **Vercel** — runs the Next.js app. <https://vercel.com/new>
+
+**GitHub is optional.** It gives automatic redeploys and version history, but you can deploy straight from your device with the Vercel CLI — see **Step 2B**.
 
 You can use another host instead of Vercel, but it **must support Node.js 20+ / Next.js**. Ordinary shared PHP/cPanel hosting will not work.
 
-> Never paste keys, passwords or secrets into chat. Enter them only in Supabase/GitHub/Vercel or your own `.env` files.
+> Never paste keys, passwords or secrets into chat. Enter them only in Supabase/Vercel/GitHub or your own `.env` files.
 
 ---
 
@@ -31,7 +32,9 @@ If a query says a type/table already exists, you have already run it. Continue.
 
 ---
 
-## 2. Push the code to GitHub
+## 2A. Push the code to GitHub (recommended)
+
+Create an empty repository at <https://github.com/new>. Do not initialize it with a README.
 
 In Termux, inside the project folder:
 
@@ -39,20 +42,39 @@ In Termux, inside the project folder:
 cd /storage/emulated/0/venter/hopweb/projects/wit
 
 git remote add origin https://github.com/YOUR_USERNAME/wedding-invitation-studio.git
-git add DEPLOYMENT.md .env.production.example package.json scripts/check-deploy-env.mjs scripts/seed-templates.ts .env.example README.md supabase
+git add .env.example .env.production.example DEPLOYMENT.md README.md package.json scripts/check-deploy-env.mjs scripts/seed-templates.ts supabase
 git commit -m "Add deployment kit and production seed support"
 git push -u origin HEAD
 ```
 
 If `git add` says a file is missing, skip that file name. Do **not** add `.env.local`.
 
-Create the empty GitHub repository first at <https://github.com/new>. Do not initialize it with a README.
+## 2B. Deploy without GitHub
+
+GitHub is **not mandatory**. Use this path if you want fewer accounts:
+
+```bash
+cd /storage/emulated/0/venter/hopweb/projects/wit
+
+npm install -g vercel
+vercel login                         # completes in your browser/email
+vercel project create wedding-invitation-studio
+vercel link                          # choose the project you just created
+```
+
+Then add the environment variables from Step 3 in the Vercel Dashboard, and deploy:
+
+```bash
+vercel --prod
+```
+
+Trade-off: with CLI deploys, future code changes require running `vercel --prod` again. GitHub gives automatic deployments and rollback history. Other hosts also support Git-free upload/CLI deployment.
 
 ---
 
-## 3. Deploy to Vercel
+## 3. Set environment variables and deploy
 
-1. Go to <https://vercel.com/new> → **Import** the GitHub repository you just pushed.
+1. If you used GitHub: go to <https://vercel.com/new> → **Import** the repository. If you used the CLI: your project already exists; open it in the Vercel Dashboard.
 2. Framework should be detected as **Next.js**. Do not change the build command.
 3. Add these environment variables before clicking Deploy:
 
@@ -69,7 +91,7 @@ Create the empty GitHub repository first at <https://github.com/new>. Do not ini
 
 A ready-to-copy list is in `.env.production.example`.
 
-4. Click **Deploy**.
+4. Click **Deploy** in the dashboard, or run `vercel --prod` if you used the CLI.
 5. Wait for the build to finish, then open the Vercel URL. You should see the login page.
 
 If you use another host, set the same variables and run:
