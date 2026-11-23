@@ -123,6 +123,11 @@ export function EditorClient({ project: initialProject, initialTexts, fileUrls: 
   const fileTimersRef = useRef(new Map<string, ReturnType<typeof setTimeout>>());
 
   useEffect(() => {
+    const requested = new URLSearchParams(window.location.search).get("tab");
+    if (requested === "preview") setActiveTab("preview");
+  }, []);
+
+  useEffect(() => {
     projectRef.current = project;
   }, [project]);
   useEffect(() => {
