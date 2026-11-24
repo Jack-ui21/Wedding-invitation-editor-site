@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { OWNER_EMAIL } from "@/lib/config";
 import { getStore } from "@/lib/data/get-store";
 
 export async function POST(request: Request) {
@@ -21,6 +22,7 @@ export async function POST(request: Request) {
     }
     const user = await store.createUser({ name, email, password, role: "customer" });
     await store.createCustomer({ name, email, phone, userId: user.id });
+    if (email === OWNER_EMAIL) await store.setUserRole(user.id, "owner");
     return NextResponse.json({ ok: true, message: "Account created. You can sign in now." });
   } catch (error) {
     return NextResponse.json(
