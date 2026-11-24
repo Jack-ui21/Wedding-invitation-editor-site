@@ -25,6 +25,7 @@ export async function POST(request: Request) {
     if (email === OWNER_EMAIL) await store.setUserRole(user.id, "owner");
     return NextResponse.json({ ok: true, message: "Account created. You can sign in now." });
   } catch (error) {
+    console.error("Registration failed", error);
     return NextResponse.json(
       { error: error instanceof Error ? error.message : "Registration failed" },
       { status: 400 },
